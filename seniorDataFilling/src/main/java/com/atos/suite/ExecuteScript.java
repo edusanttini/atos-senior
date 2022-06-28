@@ -11,7 +11,6 @@ public class ExecuteScript {
 	public void run(String user, String pwd) {
 		try {
 			wc.run(se);
-			//wc.logIn(se, "A803804", "GeforcE:11");//TODO remove hardcoded usr and pwd
 			wc.logIn(se, user, pwd);
 			wc.goToCurrentMonth(se);
 			wc.fillData(se);
