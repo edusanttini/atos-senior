@@ -53,6 +53,8 @@ public class WebController extends DSL {
 	private String getDataIds(String day, boolean isNewMonth) {
 		String fullDate = "";
 		int dayInt = Integer.parseInt(ud.getDay());
+		if(day.length() == 1)
+			day = "0"+day;
 		if(dayInt >= 20 || isNewMonth)
 			fullDate = ud.getYear().concat("-").concat(ud.getMonth().concat("-").concat(day));
 		else {
