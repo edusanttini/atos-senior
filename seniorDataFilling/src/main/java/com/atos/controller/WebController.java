@@ -3,8 +3,6 @@ package com.atos.controller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.atos.actions.DSL;
 import com.atos.model.Xpath;
@@ -69,7 +67,7 @@ public class WebController extends DSL {
 	}
 	
 	private void enterDataEdition(SeleniumEndpoint se, String xpath) throws InterruptedException {
-		Thread.sleep(3000);
+		Thread.sleep(5000);
 		WebElement we = se.getDriver().findElement(By.id(xpath));
 		JavascriptExecutor ex = (JavascriptExecutor)se.getDriver();
 		ex.executeScript("arguments[0].click();", we);
