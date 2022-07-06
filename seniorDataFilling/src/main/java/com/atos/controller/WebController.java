@@ -1,7 +1,10 @@
 package com.atos.controller;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.atos.actions.DSL;
 import com.atos.model.Xpath;
@@ -60,16 +63,16 @@ public class WebController extends DSL {
 		else {
 			int month = Integer.parseInt(ud.getMonth());
 			month = month - 1;
-			fullDate = ud.getYear().concat("-").concat(month+"").concat("-").concat(day);
+			fullDate = ud.getYear().concat("-").concat("0" + month + "").concat("-").concat(day);
 		}
 		return fullDate;
 	}
 	
-	@SuppressWarnings("deprecation")
 	private void enterDataEdition(SeleniumEndpoint se, String xpath) throws InterruptedException {
 		Thread.sleep(3000);
 		WebElement we = se.getDriver().findElement(By.id(xpath));
-		we.click();
+		JavascriptExecutor ex = (JavascriptExecutor)se.getDriver();
+		ex.executeScript("arguments[0].click();", we);
 		this.waitFor(se, Xpath.btnAddData, 5);
 	}
 	
@@ -183,7 +186,7 @@ public class WebController extends DSL {
 		for(int day = startDay; day <=this.getMonthDays(lastMonth); day++) {
 			if(ud.isEOW(day, lastMonth))
 				continue;
-			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, true))))
+			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, false))))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, false)));
 			this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, false)));
