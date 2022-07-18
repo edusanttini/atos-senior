@@ -16,13 +16,16 @@ public enum Xpath {
 	btnSaveDateEditionTable("saveAppointment"),
 	dropDownJustifyClass0("selectJustificative-0"),
 	dropDownJustifyClass1("selectJustificative-1"),
+	btnForgotjustifyReason("justificative_1"),
+	btnNoConectionJustifyReason("justificative_2"),
 	btnHomeOfficeJustifyReason("justificative_4"),
+	btnManuelMarkJustifyReason("justificative_5"),
 	
 	
 	
 	
 	
-	deleteMee("");
+	dummy("");
 	
 	private String xPathValue;
 	

@@ -106,38 +106,75 @@ public class WebController extends DSL {
 		savebtn.click();
 	}
 	
-	private void selectJustification(SeleniumEndpoint se) throws InterruptedException {
+	private void selectJustification(SeleniumEndpoint se, String justification) throws InterruptedException {
 		WebElement justify1 = se.getDriver().findElement(By.id(Xpath.dropDownJustifyClass0.get()));
 		justify1.click();
 		Thread.sleep(2000);
-		if(this.elementExists(se, Xpath.btnHomeOfficeJustifyReason)) {
-			WebElement homeOffice = se.getDriver().findElement(By.id(Xpath.btnHomeOfficeJustifyReason.get()));
-			homeOffice.click();	
+		switch (justification) {
+		case "1":
+			if(this.elementExists(se, Xpath.btnForgotjustifyReason)) {
+				WebElement forgot = se.getDriver().findElement(By.id(Xpath.btnForgotjustifyReason.get()));
+				forgot.click();
+			
+			}
+			Thread.sleep(2000);
+			WebElement justify2 = se.getDriver().findElement(By.id(Xpath.dropDownJustifyClass1.get()));
+			justify2.click();
+			Thread.sleep(2000);
+			if(this.elementExists(se, Xpath.btnForgotjustifyReason)) {
+				WebElement forgot2 = se.getDriver().findElement(By.id(Xpath.btnForgotjustifyReason.get()));
+				forgot2.click();
+			}
+			break;
+		case "2":
+			if(this.elementExists(se, Xpath.btnNoConectionJustifyReason)) {
+				WebElement noConnection = se.getDriver().findElement(By.id(Xpath.btnNoConectionJustifyReason.get()));
+				noConnection.click();
+			
+			}
+			Thread.sleep(2000);
+			WebElement justify2a = se.getDriver().findElement(By.id(Xpath.dropDownJustifyClass1.get()));
+			justify2a.click();
+			Thread.sleep(2000);
+			if(this.elementExists(se, Xpath.btnNoConectionJustifyReason)) {
+				WebElement noConnection2 = se.getDriver().findElement(By.id(Xpath.btnNoConectionJustifyReason.get()));
+				noConnection2.click();
+			}
+			break;
+		case "4":
+			if(this.elementExists(se, Xpath.btnHomeOfficeJustifyReason)) {
+				WebElement homeOffice = se.getDriver().findElement(By.id(Xpath.btnHomeOfficeJustifyReason.get()));
+				homeOffice.click();
+			
+			}
+			Thread.sleep(2000);
+			WebElement justify2b = se.getDriver().findElement(By.id(Xpath.dropDownJustifyClass1.get()));
+			justify2b.click();
+			Thread.sleep(2000);
+			if(this.elementExists(se, Xpath.btnHomeOfficeJustifyReason)) {
+				WebElement homeOffice2 = se.getDriver().findElement(By.id(Xpath.btnHomeOfficeJustifyReason.get()));
+				homeOffice2.click();
+			}
+			break;
+		case "5":
+			if(this.elementExists(se, Xpath.btnManuelMarkJustifyReason)) {
+				WebElement manual = se.getDriver().findElement(By.id(Xpath.btnManuelMarkJustifyReason.get()));
+				manual.click();
+			}
+			Thread.sleep(2000);
+			WebElement justify2c = se.getDriver().findElement(By.id(Xpath.dropDownJustifyClass1.get()));
+			justify2c.click();
+			Thread.sleep(2000);
+			if(this.elementExists(se, Xpath.btnManuelMarkJustifyReason)) {
+				WebElement manual2 = se.getDriver().findElement(By.id(Xpath.btnManuelMarkJustifyReason.get()));
+				manual2.click();
+			}
+			break;
+		default:
+			System.out.println("Justificative" + justification + "is not on the list. "
+					+ "Please inform a valid justificative number(1, 2, 4 or 5)");
+			break;
 		}
-		Thread.sleep(2000);
-		WebElement justify2 = se.getDriver().findElement(By.id(Xpath.dropDownJustifyClass1.get()));
-		justify2.click();
-		Thread.sleep(2000);
-		if(this.elementExists(se, Xpath.btnHomeOfficeJustifyReason)) {
-			WebElement homeOffice2 = se.getDriver().findElement(By.id(Xpath.btnHomeOfficeJustifyReason.get()));
-			homeOffice2.click();
-		}
-	}
-	
-	private int getMonthDays() {
-		int month = Integer.parseInt(ud.getMonth());
-		int year = Integer.parseInt(ud.getYear());
-		if(month == 1 || month == 3 || month == 5 || month == 7 
-				|| month == 8 || month == 10 || month ==12)
-			return 31;
-		else if(month == 2)
-			if(year == 2024 || year == 2028 || year == 2032 || year == 2036
-				|| year == 2040 || year == 2044 || year == 2048 || year == 2052)
-				return 29;
-			else
-				return 28;
-		else
-			return 30;
 	}
 	
 	private int getMonthDays(int month) {
@@ -162,7 +199,7 @@ public class WebController extends DSL {
 		return false;
 	}
 
-	private void fillDataLoop(SeleniumEndpoint se, int startDay) throws InterruptedException {
+	private void fillDataLoop(SeleniumEndpoint se, int startDay, String justificative) throws InterruptedException {
 		for(int day = startDay; day <=Integer.parseInt(ud.getDay()); day++) {
 			if(ud.isEOW(day, Integer.parseInt(ud.getMonth())))
 				continue;
@@ -174,12 +211,12 @@ public class WebController extends DSL {
 			this.waitFor(se, Xpath.inputFirstDateLine, 5);
 			this.addNewLine(se);
 			this.fillHour(se);
-			this.selectJustification(se);
+			this.selectJustification(se, justificative);
 			this.saveDateEdition(se);
 		}
 	}
 	
-	private void fillExclusiveDataLoop(SeleniumEndpoint se, int startDay) throws InterruptedException {
+	private void fillExclusiveDataLoop(SeleniumEndpoint se, int startDay, String justificative) throws InterruptedException {
 		int lastMonth = Integer.parseInt(ud.getMonth()) - 1;
 		for(int day = startDay; day <=this.getMonthDays(lastMonth); day++) {
 			if(ud.isEOW(day, lastMonth))
@@ -192,17 +229,17 @@ public class WebController extends DSL {
 			this.waitFor(se, Xpath.inputFirstDateLine, 5);
 			this.addNewLine(se);
 			this.fillHour(se);
-			this.selectJustification(se);
+			this.selectJustification(se, justificative);
 			this.saveDateEdition(se);
 		}
 	}
 	
-	public void fillData(SeleniumEndpoint se) throws InterruptedException {
+	public void fillData(SeleniumEndpoint se, String justificative) throws InterruptedException {
 		if(Integer.parseInt(ud.getDay()) >= 20) {
-			this.fillDataLoop(se, 20);
+			this.fillDataLoop(se, 20, justificative);
 		} else {
-			this.fillExclusiveDataLoop(se, 20);
-			this.fillDataLoop(se, 1);
+			this.fillExclusiveDataLoop(se, 20, justificative);
+			this.fillDataLoop(se, 1, justificative);
 		}
 	}
 }
