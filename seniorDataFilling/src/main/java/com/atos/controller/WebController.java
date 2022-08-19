@@ -66,19 +66,24 @@ public class WebController extends DSL {
 		return fullDate;
 	}
 	
-	private void enterDataEdition(SeleniumEndpoint se, String xpath) throws InterruptedException {
+
+	private boolean enterDataEdition(SeleniumEndpoint se, String xpath) throws InterruptedException {
 		Thread.sleep(5000);
 		WebElement we = se.getDriver().findElement(By.id(xpath));
+		WebElement parent = we.findElement(By.xpath("./../../.."));
+//		if(parent.getAttribute("innerHTML").contains("!isClockPending"))
+//			return false;//TODO apparently !isClockPending is present in all parents attributes, need to find an exclusive id or string for when people is on vacation
 		JavascriptExecutor ex = (JavascriptExecutor)se.getDriver();
 		ex.executeScript("arguments[0].click();", we);
 		this.waitFor(se, Xpath.btnAddData, 5);
+		return true;
 	}
 	
 	private void addNewLine(SeleniumEndpoint se) {
 		WebElement we = se.getDriver().findElement(By.id(Xpath.btnAddData.get()));
 		we.click();
 	}
-	
+
 	private void fillHour(SeleniumEndpoint se) {
 		String entryTime;
 		String exitTime;
@@ -199,6 +204,7 @@ public class WebController extends DSL {
 		return false;
 	}
 
+
 	private void fillDataLoop(SeleniumEndpoint se, int startDay, String justificative) throws InterruptedException {
 		for(int day = startDay; day <=Integer.parseInt(ud.getDay()); day++) {
 			if(ud.isEOW(day, Integer.parseInt(ud.getMonth())))
@@ -206,13 +212,14 @@ public class WebController extends DSL {
 			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, true))))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, true)));
-			this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, true)));
-			this.addNewLine(se);
-			this.waitFor(se, Xpath.inputFirstDateLine, 5);
-			this.addNewLine(se);
-			this.fillHour(se);
-			this.selectJustification(se, justificative);
-			this.saveDateEdition(se);
+			if(this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, true)))) {
+				this.addNewLine(se);
+				this.waitFor(se, Xpath.inputFirstDateLine, 5);
+				this.addNewLine(se);
+				this.fillHour(se);
+				this.selectJustification(se, justificative);
+				this.saveDateEdition(se);
+			}
 		}
 	}
 	
@@ -224,13 +231,14 @@ public class WebController extends DSL {
 			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, false))))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, false)));
-			this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, false)));
-			this.addNewLine(se);
-			this.waitFor(se, Xpath.inputFirstDateLine, 5);
-			this.addNewLine(se);
-			this.fillHour(se);
-			this.selectJustification(se, justificative);
-			this.saveDateEdition(se);
+			if(this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, false)))) {
+				this.addNewLine(se);
+				this.waitFor(se, Xpath.inputFirstDateLine, 5);
+				this.addNewLine(se);
+				this.fillHour(se);
+				this.selectJustification(se, justificative);
+				this.saveDateEdition(se);
+			}
 		}
 	}
 	

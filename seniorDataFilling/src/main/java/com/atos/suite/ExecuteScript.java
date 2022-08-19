@@ -14,7 +14,7 @@ public class ExecuteScript {
 			wc.logIn(se, user, pwd);
 			wc.goToCurrentMonth(se);
 			wc.fillData(se, justificative);
-			wc.quit(se);
+			//wc.quit(se);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

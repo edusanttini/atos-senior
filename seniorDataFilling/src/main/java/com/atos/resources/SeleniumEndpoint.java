@@ -1,11 +1,8 @@
 package com.atos.resources;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -32,16 +29,6 @@ public class SeleniumEndpoint {
 	    @AfterEach
 	    public void tearDown() {
 	        driver.quit();
-	    }
-
-	    @Test
-	    public void verify() {
-	        // Exercise
-	        String title = driver.getTitle();
-	        System.out.println("string title: " + title);
-
-	        // Verify
-	        assertThat(title).contains("Google");
 	    }
 
 		public WebDriver getDriver() {
