@@ -2,10 +2,9 @@ package com.atos.controller;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
-import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.atos.actions.DSL;
@@ -51,8 +50,12 @@ public class WebController extends DSL {
 		}
 	}
 
-	private String getFormatedData(String data) {
+	private String getFormatedDataMarcacao(String data) {
 		return "dia_"+data+"_InserirMarcacao";
+	}
+	
+	private String getFormatedDataBadge(String data) {
+		return "badge-0-"+data;
 	}
 	
 	private String getDataIds(String day, boolean isNewMonth) {
@@ -84,17 +87,7 @@ public class WebController extends DSL {
 		Thread.sleep(5000);
 		try {
 			WebElement we = se.getDriver().findElement(By.id(xpath));
-
-
-			//WebElement parent = we.findElement(By.xpath("./../../.."));
-			//System.out.println("------------enterDataEdition: "+ parent.getAttribute("innerHTML").contains("ng-scope time-adjustment-dia-horario-especial"));
-			//System.out.println("------------enterDataEdition1: "+ parent.getAttribute("innerHTML"));
-			//WebElement gParent = we.findElement(By.xpath("//td/parent::div[@class=\"ng-scope time-adjustment-dia-horario-especial\"]"));
-			//System.out.println("------------enterDataEdition1: "+ gParent.getAttribute("innerHTML"));
-			//if(gParent.getAttribute("innerHTML").contains("ng-scope time-adjustment-dia-horario-especial"))
-				//return false;//TODO apparently !isClockPending is present in all parents attributes, need to find an exclusive id or string for when people is on vacation
-
-
+//			we.click(); isso aqui funciona emmmmm
 			JavascriptExecutor ex = (JavascriptExecutor)se.getDriver();
 			ex.executeScript("arguments[0].click();", we);
 			this.waitFor(se, Xpath.btnAddData, 5);	
@@ -234,14 +227,24 @@ public class WebController extends DSL {
 		return false;
 	}
 
+	private boolean checkIfVacation(SeleniumEndpoint se, int day, boolean isNewMonth) throws InterruptedException {
+		Thread.sleep(1000);
+		try {
+			return se.getDriver().findElement(By.id(this.getFormatedDataBadge(this.getDataIds(""+day, isNewMonth))))
+				.getText().contains("Afastamento");
+		} catch (NoSuchElementException e) {
+			return false;
+		} 
+	}
+
 	private void fillSpecificData(SeleniumEndpoint se, int day, boolean isNewMonth, String justificative) throws InterruptedException {
-		if(this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, isNewMonth)))) {
+		if(this.enterDataEdition(se, this.getFormatedDataMarcacao(this.getDataIds(""+day, isNewMonth)))) {
 			this.addNewLine(se);
 			this.waitFor(se, Xpath.inputFirstDateLine, 5);
 			this.addNewLine(se);
 			this.fillHour(se);
 			this.selectJustification(se, justificative);
-			this.saveDateEdition(se, this.getFormatedData(this.getDataIds(""+day, isNewMonth)));
+			this.saveDateEdition(se, this.getFormatedDataMarcacao(this.getDataIds(""+day, isNewMonth)));
 		}
 	}
 
@@ -250,10 +253,13 @@ public class WebController extends DSL {
 		for(int day = startDay; day <=Integer.parseInt(ud.getDay()); day++) {
 			if(ud.isEOW(day, Integer.parseInt(ud.getMonth())))
 				continue;
-			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, true))))
+			if(this.checkIfAlreadyFilled(se, this.getFormatedDataMarcacao(this.getDataIds(""+day, true))))
+				continue;
+			if(this.checkIfVacation(se, day, true))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, true)));
-			while(!this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, true))))
+			int i = 0;
+			while(!this.checkIfAlreadyFilled(se, this.getFormatedDataMarcacao(this.getDataIds(""+day, true))) && i++<5)
 				this.fillSpecificData(se, day, true, justificative);
 		}
 	}
@@ -269,10 +275,13 @@ public class WebController extends DSL {
 		for(int day = startDay; day <=this.getMonthDays(lastMonth); day++) {
 			if(ud.isEOW(day, lastMonth))
 				continue;
-			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, false))))
+			if(this.checkIfAlreadyFilled(se, this.getFormatedDataMarcacao(this.getDataIds(""+day, false))))
+				continue;
+			if(this.checkIfVacation(se, day, false))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, false)));
-			while(!this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, false))))
+			int i = 0;
+			while(!this.checkIfAlreadyFilled(se, this.getFormatedDataMarcacao(this.getDataIds(""+day, false))) && i++<5)
 				this.fillSpecificData(se, day, false, justificative);
 		}
 	}
@@ -285,4 +294,5 @@ public class WebController extends DSL {
 			this.fillDataLoop(se, 1, justificative);
 		}
 	}
+	
 }
