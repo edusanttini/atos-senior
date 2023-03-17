@@ -3,6 +3,10 @@ package com.atos.controller;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+import org.openqa.selenium.support.ui.Wait;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.atos.actions.DSL;
 import com.atos.model.Xpath;
@@ -59,8 +63,17 @@ public class WebController extends DSL {
 		if(dayInt >= 20 || isNewMonth)
 			fullDate = ud.getYear().concat("-").concat(ud.getMonth().concat("-").concat(day));
 		else {
-			int month = Integer.parseInt(ud.getMonth());
-			month = month - 1;
+			int month = 0;
+			if (ud.getMonth().contentEquals("01"))
+				month = 12;
+			else
+				month = Integer.parseInt(ud.getMonth()) -1;
+			if(month == 10 || month == 11)
+				return ud.getYear().concat("-").concat(month + "").concat("-").concat(day);
+			if(month == 12) {
+				int lastYear = Integer.parseInt(ud.getYear()) -1;
+				return Integer.toString(lastYear).concat("-").concat(month + "").concat("-").concat(day);
+			}
 			fullDate = ud.getYear().concat("-").concat("0" + month + "").concat("-").concat(day);
 		}
 		return fullDate;
@@ -69,13 +82,26 @@ public class WebController extends DSL {
 
 	private boolean enterDataEdition(SeleniumEndpoint se, String xpath) throws InterruptedException {
 		Thread.sleep(5000);
-		WebElement we = se.getDriver().findElement(By.id(xpath));
-		WebElement parent = we.findElement(By.xpath("./../../.."));
-//		if(parent.getAttribute("innerHTML").contains("!isClockPending"))
-//			return false;//TODO apparently !isClockPending is present in all parents attributes, need to find an exclusive id or string for when people is on vacation
-		JavascriptExecutor ex = (JavascriptExecutor)se.getDriver();
-		ex.executeScript("arguments[0].click();", we);
-		this.waitFor(se, Xpath.btnAddData, 5);
+		try {
+			WebElement we = se.getDriver().findElement(By.id(xpath));
+
+
+			//WebElement parent = we.findElement(By.xpath("./../../.."));
+			//System.out.println("------------enterDataEdition: "+ parent.getAttribute("innerHTML").contains("ng-scope time-adjustment-dia-horario-especial"));
+			//System.out.println("------------enterDataEdition1: "+ parent.getAttribute("innerHTML"));
+			//WebElement gParent = we.findElement(By.xpath("//td/parent::div[@class=\"ng-scope time-adjustment-dia-horario-especial\"]"));
+			//System.out.println("------------enterDataEdition1: "+ gParent.getAttribute("innerHTML"));
+			//if(gParent.getAttribute("innerHTML").contains("ng-scope time-adjustment-dia-horario-especial"))
+				//return false;//TODO apparently !isClockPending is present in all parents attributes, need to find an exclusive id or string for when people is on vacation
+
+
+			JavascriptExecutor ex = (JavascriptExecutor)se.getDriver();
+			ex.executeScript("arguments[0].click();", we);
+			this.waitFor(se, Xpath.btnAddData, 5);	
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new InterruptedException("error - " + e);
+		}
 		return true;
 	}
 	
@@ -106,9 +132,13 @@ public class WebController extends DSL {
 		this.type(se, By.id(Xpath.inputSecDateLine.get()), exitTime);
 	}
 	
-	private void saveDateEdition(SeleniumEndpoint se) {
+	private void saveDateEdition(SeleniumEndpoint se, String xpath) {
 		WebElement savebtn = se.getDriver().findElement(By.id(Xpath.btnSaveDateEditionTable.get()));
 		savebtn.click();
+		@SuppressWarnings("deprecation")
+		WebDriverWait wait = new WebDriverWait(se.getDriver(), 20);
+		wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id(Xpath.btnSaveDateEditionTable.get())));
+		wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id(xpath)));
 	}
 	
 	private void selectJustification(SeleniumEndpoint se, String justification) throws InterruptedException {
@@ -204,6 +234,17 @@ public class WebController extends DSL {
 		return false;
 	}
 
+	private void fillSpecificData(SeleniumEndpoint se, int day, boolean isNewMonth, String justificative) throws InterruptedException {
+		if(this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, isNewMonth)))) {
+			this.addNewLine(se);
+			this.waitFor(se, Xpath.inputFirstDateLine, 5);
+			this.addNewLine(se);
+			this.fillHour(se);
+			this.selectJustification(se, justificative);
+			this.saveDateEdition(se, this.getFormatedData(this.getDataIds(""+day, isNewMonth)));
+		}
+	}
+
 
 	private void fillDataLoop(SeleniumEndpoint se, int startDay, String justificative) throws InterruptedException {
 		for(int day = startDay; day <=Integer.parseInt(ud.getDay()); day++) {
@@ -212,33 +253,27 @@ public class WebController extends DSL {
 			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, true))))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, true)));
-			if(this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, true)))) {
-				this.addNewLine(se);
-				this.waitFor(se, Xpath.inputFirstDateLine, 5);
-				this.addNewLine(se);
-				this.fillHour(se);
-				this.selectJustification(se, justificative);
-				this.saveDateEdition(se);
-			}
+			while(!this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, true))))
+				this.fillSpecificData(se, day, true, justificative);
 		}
 	}
 	
 	private void fillExclusiveDataLoop(SeleniumEndpoint se, int startDay, String justificative) throws InterruptedException {
-		int lastMonth = Integer.parseInt(ud.getMonth()) - 1;
+
+		int lastMonth = 0;
+		if(ud.getMonth().contentEquals("01"))
+			lastMonth = 12;
+		else
+			lastMonth = Integer.parseInt(ud.getMonth()) - 1;
+
 		for(int day = startDay; day <=this.getMonthDays(lastMonth); day++) {
 			if(ud.isEOW(day, lastMonth))
 				continue;
 			if(this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, false))))
 				continue;
 			//System.out.println("-----------------: " + this.getFormatedData(this.getDataIds(""+day, false)));
-			if(this.enterDataEdition(se, this.getFormatedData(this.getDataIds(""+day, false)))) {
-				this.addNewLine(se);
-				this.waitFor(se, Xpath.inputFirstDateLine, 5);
-				this.addNewLine(se);
-				this.fillHour(se);
-				this.selectJustification(se, justificative);
-				this.saveDateEdition(se);
-			}
+			while(!this.checkIfAlreadyFilled(se, this.getFormatedData(this.getDataIds(""+day, false))))
+				this.fillSpecificData(se, day, false, justificative);
 		}
 	}
 	

@@ -17,7 +17,12 @@ public class UniqueDate {
 	}
 
 	public boolean isEOW(int day, int month) {
-		LocalDateTime wen = LocalDateTime.of(now.getYear(), month, day, 10, 12);
+		LocalDateTime wen;
+		if(month == 12)
+			wen = LocalDateTime.of(now.getYear()-1, month, day, 10, 12);
+		else
+			wen = LocalDateTime.of(now.getYear(), month, day, 10, 12);
+
 		if(wen.getDayOfWeek().toString().contentEquals("SATURDAY")
 				|| wen.getDayOfWeek().toString().contentEquals("SUNDAY"))
 			return true;
