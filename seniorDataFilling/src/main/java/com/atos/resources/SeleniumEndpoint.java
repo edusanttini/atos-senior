@@ -12,28 +12,34 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 public class SeleniumEndpoint {
 
 	 public WebDriver driver;
-	 
-	    @BeforeAll
-	    public void setupChromeDriver() {
-	    	WebDriverManager.chromedriver().setup();
-	    }
+	 public String chromedriverPath; // Manually assigned ChromeDriver path
 
-	    @BeforeEach
-	    public void openBrowser() throws InterruptedException {
-			ChromeOptions options = new ChromeOptions();
-			options.addArguments("--ignore-certificate-errors");
-			options.addArguments("--remote-allow-origins=*"); 
-			//driver = WebDriverManager.chromedriver().capabilities(options).create();//workaround for https://github.com/bonigarcia/webdrivermanager/issues/1007
-			driver = new ChromeDriver(options);//uncomment when issue fixed
-	        driver.get("https://seniorx.myatos.net:8181/gestaoponto-frontend/login");
-	    }
+    @BeforeAll
+    public void setupChromeDriver() {
+        // Set the path to your downloaded ChromeDriver based on your preference
+        // Replace "C:\\path\\to\\chromedriver.exe" with your actual path
+        //chromedriverPath = "C:\\path\\to\\chromedriver.exe";
+		chromedriverPath = "C:\\Users\\santi\\.cache\\selenium\\chromedriver\\win32\\121.0.6167.184\\chromedriver.exe";
+    }
 
-	    @AfterEach
-	    public void tearDown() {
-	        //driver.quit();
-	    }
+	@BeforeEach
+    public void openBrowser() throws InterruptedException {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--ignore-certificate-errors");
+        options.addArguments("--remote-allow-origins=*");
+        System.setProperty("webdriver.chrome.driver", chromedriverPath); // Set system property manually
+        driver = new ChromeDriver(options);
 
-		public WebDriver getDriver() {
-			return this.driver;
-		}
+        //driver.get("https://seniorx.myatos.net:8181/gestaoponto-frontend/login");
+        driver.get("https://webp12.seniorcloud.com.br:31171/gestaoponto-frontend/login");
+    }
+
+	@AfterEach
+	public void tearDown() {
+	    //driver.quit();
+	}
+
+	public WebDriver getDriver() {
+		return this.driver;
+	}
 }

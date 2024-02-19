@@ -1,0 +1,42 @@
+/target/
+
+.classpath
+.project
+.settings/
+target/
+
+# Local configuration files
+myConf.bat
+
+# Binaries and executables
+chromedriver.exe
+
+# Target JAR file (if appropriate)
+seniorDataFilling-0.0.1-SNAPSHOT.jar
+
+# IDE-specific files (adjust based on your IDE)
+.idea/*
+.vscode/*
+
+# Build artifacts and temporary files
+target/*
+.gradle/*
+.mvn/*
+
+# Logs and reports
+*.log
+*.txt
+coverage/*
+
+# Test output and temporary data
+**/__pycache__
+
+# Ignore any platform-specific configuration files
+.DS_Store
+
+# IDE project files (add/remove based on your IDE)
+*.iml
+*.ipr
+*.iws
+
+# Exclude any other locally generated files or folders as needed
